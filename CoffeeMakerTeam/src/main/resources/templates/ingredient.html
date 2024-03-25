@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Add Ingredient</title>
+	<meta http-equiv="Content-Type" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, charset=UTF-8">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+	<link rel="stylesheet" href="css/app.css" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Montserrat&family=Open+Sans+Condensed:ital,wght@1,300&display=swap"
+		rel="stylesheet">
+	<link rel="icon"
+		href="https://drive.google.com/uc?export=view&id=15CUAZOSxawhdWDe9cJoGQPY3dVgbQ0R_"
+		type="image/png">
+</head>
+
+<body>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+		crossorigin="anonymous"></script>
+
+	<script>
+
+		/*<![CDATA[*/
+		var app = angular.module('myApp', []);
+		app.controller('ingredientCtrl', function ($scope, $http) {
+
+			/* Define the Ingredient Model */
+			$scope.ingredient = {
+
+				"name": ""
+
+			};
+			$scope.amount = null;
+			$scope.message = "";
+
+			$scope.submitIngredient = function () {
+
+				if (hasAllFields()) {
+
+					let body = {};
+
+					body.ingredient = $scope.ingredient.name;
+					body.authUser = JSON.parse(sessionStorage.getItem("currentUser"));
+
+					let config = {
+
+						"params": {
+							"amount": $scope.amount
+						}
+
+					}
+
+
+					//API Call
+					//UPDATE ingredients (and as a side effect, the inventory)
+					$http.post("/api/v1/ingredients/", body, config).then(function (successResponse) {
+
+						// Reset the form if successful.
+						$scope.reset();
+
+						// Save the message in scope and display it in html
+						$scope.message = successResponse.data.message;
+
+					}, function (errorResponse) {
+
+						// Save the message in scope and display it in html
+						$scope.message = errorResponse.data.message;
+					});
+
+					// Cool animation for the message changing
+					animateMessage();
+
+				}
+
+				if ($scope.ingredient.name == "") {
+					$scope.message = "Cannot create an unamed Ingredient";
+					animateMessage();
+				} else if ($scope.amount == null || $scope.amount == undefined) {
+					$scope.message = "Cannot create " + $scope.ingredient.name + " with a quantity of 0";
+					animateMessage();
+				}
+
+			};
+
+
+			/**
+			 * Resets the form
+			 */
+			$scope.reset = function () {
+				// Reset the recipe
+				$scope.ingredient = {
+
+					"name": "",
+				};
+
+				$scope.amount = null;
+				$scope.message = "";
+
+
+			}
+
+
+			function hasAllFields() {
+				//Negative quantity check is done by the front end form logic, this just checks that it has not been 
+				//left blank
+				if ($scope.ingredient.name != "" && $scope.amount != null && $scope.amount != undefined) {
+					return true;
+				}
+
+				return false;
+			};
+
+			// Animate the message changing.
+			function animateMessage() {
+
+				// Refrenced this: https://stackoverflow.com/a/58353279
+				const element = document.getElementById('message')
+
+				element.classList.remove('messageAnimation'); // reset animation
+				void element.offsetWidth; // trigger reflow
+				element.classList.add('messageAnimation'); // start animation
+			};
+
+
+		});
+
+	</script>
+
+	<style>
+		body {
+			background-color: #4b3120;
+
+		}
+
+		.panel {
+			background-color: #DAC3A2;
+			width: 90%;
+			margin: auto;
+			margin-top: 3%;
+			margin-bottom: 3%;
+			height: 50%;
+			z-index: -1;
+			padding: 3%;
+			border-radius: 10px;
+		}
+
+		h1 {
+			color: #FFFFFF;
+			font-family: Arial;
+			font-weight: bold;
+			font-size: 28px;
+		}
+
+		.header-box {
+			background-color: #4b3120;
+			padding-left: 2%;
+			padding-top: 1%;
+			padding-bottom: 1%;
+			text-align: center;
+			border-radius: 10px;
+		}
+
+		.index-button {
+			background-color: #896145;
+			color: white;
+			font-size: 20px;
+			padding: 1%;
+			width: 20%;
+			text-align: left;
+			border: none;
+			border-radius: 10px;
+			margin-top: 2%;
+			text-decoration: none;
+			cursor: pointer;
+			transition: background-color 0.3s;
+		}
+
+		.index-button:hover {
+			background-color: #5E371D;
+		}
+
+		.input-button {
+			background-color: #896145;
+			color: white;
+			font-size: 20px;
+			padding: 1%;
+			width: 68%;
+			text-align: left;
+			border: none;
+			border-radius: 10px;
+			margin-top: 2%;
+			margin-bottom: 2%;
+			margin-left: 31%;
+			text-decoration: none;
+			cursor: pointer;
+			transition: background-color 0.3s;
+		}
+
+		.input-button:hover {
+			background-color: #5E371D;
+		}
+
+		.bottom-button {
+			background-color: #896145;
+			color: white;
+			font-size: 20px;
+			padding: 0%;
+			width: 13%;
+			height: 35px;
+			text-align: center;
+			border: none;
+			border-radius: 10px;
+			margin: 1%;
+			text-decoration: none;
+			cursor: pointer;
+			transition: background-color 0.3s;
+		}
+
+		.bottom-button:hover {
+			background-color: #5E371D;
+		}
+
+		.body-box {
+			background-color: #6F4E37;
+			color: white;
+		}
+
+		table {
+			width: 100%;
+			margin-top: 1%;
+		}
+
+		.body-text {
+			text-align: left;
+			padding-left: 31%;
+			padding-right: 1%;
+		}
+
+		.messageAnimation {
+			animation-name: jump-shaking;
+			animation-duration: 0.83s;
+			animation-timing-function: ease-in-out;
+		}
+
+		::placeholder {
+			color: #BBBBBB;
+		}
+
+		@keyframes inAndOut {
+
+			0% {
+				background-color: rgba(66, 148, 226, 0);
+				color: black;
+
+			}
+
+			50% {
+				background-color: rgba(66, 148, 226, 1);
+				color: white;
+			}
+
+			100% {
+				background-color: rgba(66, 148, 226, 0);
+				color: black;
+			}
+
+		}
+
+		/* Referenced this: https://unused-css.com/blog/css-shake-animation/ */
+		@keyframes jump-shaking {
+			0% {
+				transform: translateX(0)
+			}
+
+			25% {
+				transform: translateY(-9px)
+			}
+
+			35% {
+				transform: translateY(-9px) rotate(2deg)
+			}
+
+			55% {
+				transform: translateY(-9px) rotate(-2deg)
+			}
+
+			65% {
+				transform: translateY(-9px) rotate(2deg)
+			}
+
+			75% {
+				transform: translateY(-9px) rotate(-2deg)
+			}
+
+			100% {
+				transform: translateY(0) rotate(0)
+			}
+		}
+	</style>
+
+	<div class="panel" ng-app="myApp" ng-controller="ingredientCtrl">
+
+		<!-- Header -->
+		<h1 class="header-box">Add Ingredient</h1>
+
+		<br />
+
+
+		<form>
+			<table>
+				<tr>
+					<td>
+						<label for="ingredient-name" class="form-label">
+							<h4> Name </h4>
+						</label>
+					</td>
+					<td>
+						<input ng-model="ingredient.name" type="text" class="input-button" placeholder="Ingredient Name"
+							id="ingredient-name" aria-describedby="ingredientName" required>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<label for="ingredient-quantity" class="form-label">
+							<h4> Quantity </h4>
+						</label>
+					</td>
+					<td>
+						<input type="number" class="input-button" ng-model="amount" placeholder="0"
+							id="ingredient-quantity" required min="0">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button onclick="window.location.href='managerindex'" class="index-button"
+							style="text-align: center; width: 30%"> Home </button>
+					</td>
+					<td>
+						<button type="button" class="bottom-button float-end"
+							ng-click="submitIngredient()">Submit</button>
+						<button type="button" class="bottom-button float-end" ng-click="reset()">Reset</button>
+					</td>
+				</tr>
+			</table>
+		</form>
+
+
+		<div class="col m-3 w-75">
+			<label id="message" style="border-radius: 5px;" class="fs-6 p-1">{{message}}</label>
+		</div>
+
+	</div>
+
+</body>
